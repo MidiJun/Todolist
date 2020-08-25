@@ -16,13 +16,13 @@
       </q-input>
     </div>
 
-    <q-list class="bg-white">
+    <q-list class="bg-white" v-if="tasks.length">
       <q-item
         v-for="(task, i) in tasks"
         :key="i"
         v-ripple
         clickable
-        @click="task.done = !task.done"
+        @click="taskStatus(task)"
         :class="{ 'done bg-teal-1': task.done }"
       >
         <q-item-section avatar>
@@ -53,23 +53,35 @@ export default {
   data() {
     return {
       newTask: "",
-      tasks: [
-        {
-          title: "打扫卫生",
-          done: false
-        },
-        {
-          title: "整理文档",
-          done: true
-        }
-        // {
-        //   title: "knkn能量补充",
-        //   done: false
-        // }
-      ]
+      list: [],
+      tasks: []
+      // tasks: [
+      //   {
+      //     title: "打扫卫生",
+      //     done: false
+      //   },
+      //   {
+      //     title: "整理文档",
+      //     done: true
+      //   }
+      // ]
     };
   },
+  created() {
+    this.getTasks();
+  },
   methods: {
+    getTasks() {
+      this.list = JSON.parse(localStorage.getItem("list") || "[]");
+      if (this.list[this.id].tasks) {
+        this.tasks = this.list[this.id].tasks;
+      } else this.tasks = [];
+    },
+    taskStatus(task) {
+      task.done = !task.done;
+      this.list[this.id].tasks = this.tasks;
+      localStorage.setItem("list", JSON.stringify(this.list));
+    },
     deleteTask(index) {
       this.$q
         .dialog({
@@ -84,6 +96,8 @@ export default {
             message: "此任务已删除",
             icon: "done"
           });
+          this.list[this.id].tasks = this.tasks;
+          localStorage.setItem("list", JSON.stringify(this.list));
         });
     },
     addTask() {
@@ -92,6 +106,14 @@ export default {
         done: false
       });
       this.newTask = "";
+      this.list[this.id].tasks = this.tasks;
+      localStorage.setItem("list", JSON.stringify(this.list));
+    }
+  },
+  props: ["id"],
+  watch: {
+    id: function(newval, oldval) {
+      this.getTasks();
     }
   }
 };

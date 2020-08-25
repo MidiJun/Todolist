@@ -22,50 +22,73 @@
     <q-drawer
       v-model="leftDrawerOpen"
       show-if-above
-      :width="300"
+      :width="260"
       :breakpoint="400"
     >
-      <q-scroll-area
-        style="height: calc(100% - 192px); margin-top: 192px; border-right: 1px solid #ddd"
-      >
+      <div class="absolute-top userPanel" style="height: 210px">
+        <img src="../statics/pic.jpeg" />
+        <div class="userInfo" align="left">
+          <div>Guo Jun</div>
+          <div class="text-grey">junguo0908@gmail.com</div>
+        </div>
+      </div>
+
+      <q-scroll-area style="height: calc(100% - 210px); margin-top: 210px;">
         <q-list padding>
-          <q-item to="/" clickable v-ripple exact>
+          <q-item
+            v-for="(item, index) in list"
+            :key="index"
+            clickable
+            :active="link === '/' + index"
+            @click="listTo(index)"
+            v-ripple
+            exact
+          >
             <q-item-section avatar>
               <q-icon name="list" />
             </q-item-section>
-
             <q-item-section>
-              日常
+              {{ item.name }}
             </q-item-section>
-          </q-item>
-          <q-item to="/" clickable v-ripple exact>
-            <q-item-section avatar>
-              <q-icon name="list" />
-            </q-item-section>
+            <!-- <q-item-section avatar @click.stop="listChange">
+              <q-icon name="more_vert" />
+            </q-item-section> -->
 
-            <q-item-section>
-              工作
+            <q-item-section side @click.stop="deleteList(index)">
+              <q-btn flat round dense icon="delete" />
             </q-item-section>
           </q-item>
         </q-list>
+        <q-btn
+          round
+          color="primary"
+          class="addlist"
+          icon="add"
+          @click="prompt = true"
+        />
       </q-scroll-area>
-
-      <div class="absolute-top bg-teal-4" style="height: 192px">
-        <div
-          class="bg-transparent  fit row  justify-center items-center q-px-md"
-        >
-          <q-avatar size="56px" class="col-8    " align="center">
-            <img
-              src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1595910886276&di=92785bb39c382fa604588c8f999aac61&imgtype=0&src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fitem%2F20181%2F30%2F201813015155_Bfx8k.thumb.700_0.jpeg"
-            />
-          </q-avatar>
-          <div class="text-weight-bold col-4 text-h5" align="left">
-            霜序八
-          </div>
-        </div>
-      </div>
     </q-drawer>
 
+    <q-dialog v-model="prompt" persistent>
+      <q-card style="min-width: 350px">
+        <q-card-section>
+          <div class="text-h6">新建清单</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <q-input
+            dense
+            v-model="newListName"
+            autofocus
+            @keyup.enter="prompt = false"
+          />
+        </q-card-section>
+        <q-card-actions align="right" class="text-primary">
+          <q-btn flat label="取消" v-close-popup />
+          <q-btn flat label="完成" v-close-popup @click="addList" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
     <q-page-container>
       <keep-alive>
         <router-view />
@@ -75,25 +98,62 @@
 </template>
 
 <script>
-// import EssentialLink from "components/EssentialLink.vue";
 import { date } from "quasar";
 
 export default {
   name: "MainLayout",
 
-  components: {
-    // EssentialLink
+  components: {},
+  created() {
+    this.getList();
   },
-
   data() {
     return {
-      leftDrawerOpen: false
+      leftDrawerOpen: false,
+      alert: false,
+      confirm: false,
+      prompt: false,
+      newListName: [], //新清单名
+      list: [],
+      link: ""
     };
   },
   computed: {
     dateNow: function() {
       let timeStamp = Date.now();
       return date.formatDate(timeStamp, "dddd D MMMM");
+    }
+  },
+  methods: {
+    getList() {
+      this.list = JSON.parse(localStorage.getItem("list") || "[]");
+    },
+    addList() {
+      this.list.push({ name: this.newListName });
+      this.newListName = "";
+      localStorage.setItem("list", JSON.stringify(this.list));
+    },
+    listTo(i) {
+      this.link = "/" + i;
+      this.$router.push("/" + i);
+    },
+    deleteList(index) {
+      this.$q
+        .dialog({
+          title: "提示",
+          message: "确定要删除此清单吗?",
+          cancel: true,
+          persistent: true
+        })
+        .onOk(() => {
+          this.list = JSON.parse(localStorage.getItem("list") || "[]");
+          this.list.splice(index, 1);
+          this.$q.notify({
+            message: "此清单已删除",
+            icon: "done"
+          });
+          localStorage.setItem("list", JSON.stringify(this.list));
+        });
     }
   }
 };
@@ -105,5 +165,25 @@ export default {
   z-index: -1;
   opacity: 90%;
   // filter: grayscale(20%);
+}
+.q-drawer-container {
+  .userPanel {
+    margin-left: 30px;
+    img {
+      width: 100%;
+      float: right;
+    }
+    .userInfo {
+      margin-top: 140px;
+      div:first-child {
+        font: bold 28px Britannic;
+      }
+    }
+  }
+  .addlist {
+    position: fixed;
+    right: 30px;
+    bottom: 30px;
+  }
 }
 </style>
