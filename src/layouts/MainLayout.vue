@@ -10,13 +10,16 @@
           aria-label="Menu"
           @click="leftDrawerOpen = !leftDrawerOpen"
         />
+        <q-toolbar-title>
+          Todo
+        </q-toolbar-title>
       </q-toolbar>
 
-      <div class="q-px-lg q-pt-xl q-mb-md">
+      <!-- <div class="q-px-lg q-pt-xl q-mb-md">
         <div class="text-h3">Todo</div>
         <div class="text-subtitle1">{{ dateNow }}</div>
-      </div>
-      <q-img src="../statics/bloom.jpg" class="header-image absolute-top" />
+      </div> -->
+      <!-- <q-img src="../statics/bloom.jpg" class="header-image absolute-top" /> -->
     </q-header>
 
     <q-drawer
@@ -39,6 +42,7 @@
             v-for="(item, index) in list"
             :key="index"
             clickable
+            class="drawerList"
             :active="link === '/' + index"
             @click="listTo(index)"
             v-ripple
@@ -55,13 +59,13 @@
             </q-item-section> -->
 
             <q-item-section side @click.stop="deleteList(index)">
-              <q-btn flat round dense icon="delete" />
+              <q-btn flat round dense class="listDel" icon="delete" />
             </q-item-section>
           </q-item>
         </q-list>
         <q-btn
-          round
-          color="primary"
+          color="secondary"
+          unelevated
           class="addlist"
           icon="add"
           @click="prompt = true"
@@ -80,7 +84,7 @@
             dense
             v-model="newListName"
             autofocus
-            @keyup.enter="prompt = false"
+            @keyup.enter="addList(), (prompt = false)"
           />
         </q-card-section>
         <q-card-actions align="right" class="text-primary">
@@ -160,6 +164,10 @@ export default {
 </script>
 
 <style lang="scss">
+@import "../css/mixin.scss";
+.drawerList {
+  color: gray;
+}
 .header-image {
   height: 100%;
   z-index: -1;
@@ -176,14 +184,20 @@ export default {
     .userInfo {
       margin-top: 140px;
       div:first-child {
-        font: bold 28px Britannic;
+        font: bold 28px "Fjalla One", sans-serif;
       }
     }
   }
   .addlist {
-    position: fixed;
-    right: 30px;
-    bottom: 30px;
+    @include squareBtn;
+  }
+  .q-item.q-router-link--active,
+  .q-item--active {
+    color: black;
+    font-weight: bold;
+  }
+  .listDel {
+    color: rgba(0, 0, 0, 0.3);
   }
 }
 </style>
