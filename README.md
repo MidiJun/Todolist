@@ -4,8 +4,6 @@
 
 ```
 # install dependencies
-npm install -g vue-cli
-npm install -g quasar-cli
 npm install
 
 # Development
